@@ -2,7 +2,9 @@
 ## 1. Required Libraries 
 * vtk (A dependency library for PCL installation, need to check Qt during compilation)
 * PCL
-
+```
+sudo apt install ros-humble-pcl-ros
+```
 ## 2. Prerequisites
 It might be due to some incorrect settings in my publish/subscribe configurations. Using ROS2's default FastDDS causes significant lag during program execution. The reason hasn't been identified yet. Please follow the steps below to change the DDS to cyclonedds.
 
@@ -98,3 +100,26 @@ ros2 launch ego_planner swarm_large.launch.py
 ```
 ros2 launch ego_planner single_run_in_sim.launch.py use_mockamap:=True use_dynamic:=False
 ```
+
+### Other issues
+
+Curl library symbol mismatch (CURL_OPENSSL_4 errors)
+
+Problem: libgdal.so.30 and libnetcdf.so.19 required CURL_OPENSSL_4 symbols not found during linking
+
+Root Cause: Conda's libcurl (version 8.5.0) was interfering with system libraries
+Solution:
+
+Always deactivate conda when building ROS2 workspaces to avoid library conflicts
+
+```bash
+# Remove conda's curl
+conda remove libcurl --force -y
+   
+# Build outside conda environment
+conda deactivate
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu
+source /opt/ros/humble/setup.bash
+colcon build
+```
+ 
